@@ -24,4 +24,12 @@ impl SubscriberRepository {
             product_subscribers.insert(subscriber.url.clone(), subscriber.clone());
             subscriber
         }
+        pub fn list_all(product_type: &str) -> Vec<Subscriber> {
+                // Kalau product_type tidak ada, return vec kosong
+                let subscribers = SUBSCRIBERS.get(product_type);
+                match subscribers {
+                    Some(map) => map.iter().map(|entry| entry.value().clone()).collect(),
+                    None => Vec::new(),
+                }
+            }
 }
