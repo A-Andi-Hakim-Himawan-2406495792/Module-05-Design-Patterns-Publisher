@@ -126,3 +126,23 @@ How does Postman help you test your work?
 Postman sangat membantu untuk menguji endpoint HTTP tanpa harus membuat frontend terlebih dahulu. Dengan Postman, saya bisa langsung mengirim request POST ke /notification/subscribe dengan body JSON berisi data subscriber, dan melihat response-nya secara real-time. Fitur Collection yang sudah disediakan di tutorial ini juga sangat berguna karena semua endpoint sudah tersusun rapi dan bisa langsung dipakai ulang. Untuk Group Project ke depannya, fitur Environment Variables di Postman juga menarik karena bisa menyimpan base URL dan token agar tidak perlu ditulis ulang di setiap request.
 
 #### Reflection Publisher-3
+Pertanyaan 1
+
+Which variation of Observer Pattern do we use in this tutorial?
+
+Dalam tutorial ini, saya menggunakan variasi Push model. Pada Push model, publisher (Main App) yang secara aktif mengirimkan data notifikasi langsung ke setiap subscriber saat event terjadi. Ketika ada product yang dibuat, dihapus, atau dipublish, Main App langsung memanggil notify() yang kemudian mengirim HTTP POST berisi payload notifikasi lengkap ke URL masing-masing subscriber. Subscriber tidak perlu meminta data apapun karena data sudah dikirimkan langsung oleh publisher begitu event terjadi.
+
+Pertanyaan 2
+
+What are the advantages and disadvantages if we used Pull model instead?
+
+Kalau saya menggunakan Pull model sebagai gantinya, subscriber yang harus aktif meminta data ke publisher secara berkala (polling). Salah satu keuntungannya adalah subscriber bisa mengambil data sesuai kebutuhannya sendiri dan tidak akan dibanjiri notifikasi yang tidak relevan karena subscriber punya kontrol penuh atas kapan dan data apa yang diambil. Selain itu, publisher jadi lebih sederhana karena tidak perlu tahu format data apa yang dibutuhkan tiap subscriber, cukup menyediakan endpoint yang bisa di-query.
+Namun kekurangannya cukup signifikan untuk kasus BambangShop ini. Subscriber harus terus-menerus melakukan polling ke publisher untuk mengecek apakah ada event baru, yang berarti banyak request sia-sia kalau memang tidak ada event sama sekali. Ini jelas boros resource baik di sisi publisher maupun subscriber. Selain itu notifikasinya juga tidak real-time karena ada jeda waktu antara event terjadi dan subscriber baru mengetahuinya, tergantung seberapa sering subscriber melakukan polling. Untuk kasus notification system seperti BambangShop, Push model jelas lebih cocok karena kita ingin subscriber langsung tahu begitu ada perubahan produk.
+
+Pertanyaan 3
+
+What will happen if we don't use multi-threading in the notification process?
+
+Kalau saya tidak menggunakan multi-threading, proses notifikasi akan berjalan secara sequential satu per satu. Main App harus menunggu HTTP POST ke subscriber pertama benar-benar selesai sebelum bisa mulai mengirim ke subscriber berikutnya. Ini sangat bermasalah karena HTTP request itu inherently lambat dan sangat bergantung kondisi jaringan.
+Bayangkan ada 100 subscriber yang terdaftar untuk satu product type. Main App harus menunggu 100 HTTP request selesai secara berurutan sebelum bisa memproses request lain dari user. Akibatnya response time Main App akan sangat lambat dan user yang mencoba membuat atau menghapus produk harus menunggu sangat lama hanya karena sistem sedang sibuk mengirim notifikasi. Bahkan kalau salah satu subscriber tidak merespons (timeout), seluruh proses notifikasi berikutnya ikut tertahan.
+Dengan multi-threading seperti yang sudah saya implementasikan menggunakan thread::spawn, setiap notifikasi dikirim di thread terpisah secara paralel. Main App tidak perlu menunggu satu pun notifikasi selesai dan tetap responsif untuk melayani request user berikutnya.
