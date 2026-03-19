@@ -10,5 +10,18 @@ lazy_static! {
 pub struct SubscriberRepository;
 
 impl SubscriberRepository {
+        pub fn add(product_type: &str, subscriber: Subscriber) -> Subscriber {
+            // Kalau product_type belum ada, buat DashMap baru untuk dia
+            if !SUBSCRIBERS.contains_key(product_type) {
+                SUBSCRIBERS.insert(String::from(product_type), DashMap::new());
+            }
 
+            // Ambil map untuk product_type ini, lalu insert subscriber
+            let mut product_subscribers = SUBSCRIBERS
+                .get_mut(product_type)
+                .unwrap();
+
+            product_subscribers.insert(subscriber.url.clone(), subscriber.clone());
+            subscriber
+        }
 }
