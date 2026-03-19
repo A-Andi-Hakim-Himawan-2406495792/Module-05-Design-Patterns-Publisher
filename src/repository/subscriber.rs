@@ -32,4 +32,14 @@ impl SubscriberRepository {
                     None => Vec::new(),
                 }
             }
+        pub fn delete(product_type: &str, subscriber_url: &str) -> Option<Subscriber> {
+                let product_subscribers = SUBSCRIBERS.get(product_type);
+                match product_subscribers {
+                    Some(map) => {
+                        // remove() returns Option<(key, value)>, kita ambil value-nya aja
+                        map.remove(subscriber_url).map(|(_, subscriber)| subscriber)
+                    },
+                    None => None,
+                }
+            }
 }
