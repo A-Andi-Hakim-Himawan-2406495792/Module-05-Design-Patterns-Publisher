@@ -78,6 +78,29 @@ This is the place for you to write reflections:
 
 #### Reflection Publisher-1
 
+Pertanyaan 1
+
+Do we still need an interface (or trait in Rust) in this BambangShop case, or a single Model struct is enough?
+
+
+Dalam kasus BambangShop ini, satu struct Subscriber sudah cukup tanpa perlu trait. Pada Observer pattern di textbook, Subscriber biasanya berupa interface agar publisher bisa memanggil update() tanpa peduli implementasinya, bisa saja ada subscriber tipe email, SMS, webhook, dll. Namun di BambangShop, semua subscriber bersifat homogen yang artinya semuanya menerima notifikasi lewat HTTP POST ke URL masing-masing. Karena hanya ada satu jenis subscriber dengan satu perilaku yang konsisten, menambahkan trait hanya akan menambah abstraksi yang tidak diperlukan.
+
+
+Pertanyaan 2
+
+Is using Vec sufficient or using DashMap is necessary?
+
+
+Vec tidak cukup untuk kasus ini. Karena id pada Product dan url pada Subscriber dimaksudkan sebagai identifier yang unik, kita butuh cara yang efisien untuk mengecek duplikasi dan melakukan pencarian. Dengan Vec, untuk mengecek apakah sebuah URL sudah ada atau menghapus subscriber tertentu, kita harus iterasi seluruh list dengan kompleksitas O(n). DashMap bekerja seperti HashMap dengan key-value pair, sehingga lookup dan delete by URL bisa dilakukan dalam O(1). Ini membuat DashMap menjadi pilihan yang lebih tepat dan memang diperlukan di sini.
+
+
+Pertanyaan 3
+
+Do we still need DashMap or can we implement Singleton pattern instead?
+
+
+Kita tetap butuh DashMap meskipun sudah menggunakan Singleton pattern. Singleton hanya menjamin bahwa hanya ada satu instance dari SUBSCRIBERS di seluruh program, yang sebetulnya sudah terpenuhi lewat lazy_static. Tapi Singleton tidak menyelesaikan masalah thread-safety. Di Rust, jika banyak thread mencoba membaca dan menulis ke HashMap biasa secara bersamaan, bisa terjadi data race. DashMap dirancang khusus untuk concurrent access dengan internal locking per-shard, sehingga aman dipakai dari banyak thread sekaligus. Jadi DashMap bukan alternatif dari Singleton, melainkan pelengkap yang menangani thread-safety yang tidak bisa ditangani Singleton sendirian.
+
 #### Reflection Publisher-2
 
 #### Reflection Publisher-3
