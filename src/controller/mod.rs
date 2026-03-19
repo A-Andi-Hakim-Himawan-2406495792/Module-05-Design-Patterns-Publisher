@@ -9,6 +9,7 @@ pub fn route_stage() -> AdHoc {
             .mount("/product", routes![product::create, product::list, product::read, product::delete])
             .mount("/notification", routes![
                 notification::subscribe,
+                notification::unsubscribe,
             ])
 
     });
