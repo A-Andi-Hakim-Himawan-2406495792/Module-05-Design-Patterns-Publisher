@@ -102,5 +102,27 @@ Do we still need DashMap or can we implement Singleton pattern instead?
 Kita tetap butuh DashMap meskipun sudah menggunakan Singleton pattern. Singleton hanya menjamin bahwa hanya ada satu instance dari SUBSCRIBERS di seluruh program, yang sebetulnya sudah terpenuhi lewat lazy_static. Tapi Singleton tidak menyelesaikan masalah thread-safety. Di Rust, jika banyak thread mencoba membaca dan menulis ke HashMap biasa secara bersamaan, bisa terjadi data race. DashMap dirancang khusus untuk concurrent access dengan internal locking per-shard, sehingga aman dipakai dari banyak thread sekaligus. Jadi DashMap bukan alternatif dari Singleton, melainkan pelengkap yang menangani thread-safety yang tidak bisa ditangani Singleton sendirian.
 
 #### Reflection Publisher-2
+Pertanyaan 1
+
+Why do we need to separate "Service" and "Repository" from a Model?
+
+
+Pemisahan "Service" dan "Repository" dari Model diperlukan karena prinsip Single Responsibility. Dalam MVC murni, Model menanggung terlalu banyak tanggung jawab sekaligus, yaitu menyimpan data, mengakses database, sekaligus menangani business logic. Ini melanggar prinsip SRP (Single Responsibility Principle). Dengan memisahkan Repository, kita punya satu lapisan khusus yang hanya bertanggung jawab mengakses dan memanipulasi data (CRUD). Dengan memisahkan Service, kita punya lapisan khusus yang hanya menangani business logic. Hasilnya, setiap lapisan lebih mudah ditest secara independen, lebih mudah diganti implementasinya tanpa merusak lapisan lain, dan kode lebih mudah dipahami karena setiap file punya tanggung jawab yang jelas.
+
+
+Pertanyaan 2
+
+What happens if we only use the Model? How does it affect code complexity?
+
+
+Kalau kita hanya menggunakan Model tanpa Service dan Repository, setiap model akan sangat bergantung satu sama lain. Misalnya, Notification perlu tahu cara mengakses data Subscriber, dan Subscriber perlu tahu cara membuat Notification. Ini menciptakan tight coupling antar model. Bayangkan Program harus memanggil langsung method milik Subscriber untuk mengirim notifikasi, sementara Subscriber juga harus tahu struktur Notification untuk membentuk payload-nya. Kompleksitas tiap model akan meledak karena satu model harus mengurus banyak hal sekaligus. Perubahan kecil di satu model bisa berdampak ke model lain yang bergantung padanya, membuat kode sulit di-maintain dan sulit ditest.
+
+
+Pertanyaan 3
+
+How does Postman help you test your work?
+
+
+Postman sangat membantu untuk menguji endpoint HTTP tanpa harus membuat frontend terlebih dahulu. Dengan Postman, saya bisa langsung mengirim request POST ke /notification/subscribe dengan body JSON berisi data subscriber, dan melihat response-nya secara real-time. Fitur Collection yang sudah disediakan di tutorial ini juga sangat berguna karena semua endpoint sudah tersusun rapi dan bisa langsung dipakai ulang. Untuk Group Project ke depannya, fitur Environment Variables di Postman juga menarik karena bisa menyimpan base URL dan token agar tidak perlu ditulis ulang di setiap request.
 
 #### Reflection Publisher-3
